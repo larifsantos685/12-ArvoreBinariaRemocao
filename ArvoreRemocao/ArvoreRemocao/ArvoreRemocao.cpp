@@ -83,7 +83,7 @@ void menu()
 void inicializar()
 {
 
-	// provisÛrio porque n„o libera a memoria usada pela arvore
+	// provis√≥rio porque n√£o libera a memoria usada pela arvore
 	raiz = NULL;
 
 	cout << "Arvore inicializada \n";
@@ -240,48 +240,137 @@ NO* buscarElementoArvoreComPai(NO* no, int valor, NO*& pai)
 
 void removerElementoArvore(NO* no, int valor) {
 	NO* pai = NULL;
+	NO* filho = NULL;
 	NO* atual = buscarElementoArvoreComPai(no, valor, pai);
 	if (atual == NULL) {
 		cout << "Elemento nao encontrado \n";
 		return;
 	}
 
+	if (valor == raiz->valor) {
+		if (raiz->esq == NULL && raiz->dir == NULL) {
+			free(raiz);
+			raiz = NULL;
+		}
+		else {
+			if (raiz->esq != NULL && raiz->dir == NULL) {
+				filho = raiz->esq;
+				free(raiz);
+				raiz = filho;
+			}
+			else {
+				if (raiz->dir != NULL && raiz->esq == NULL) {
+					filho = raiz->dir;
+					free(raiz);
+					raiz = filho;
+				}
+				else {
+					// procura o elmento mais a esquerda da sub-arvore da direita
+					NO* sucessor = raiz->dir;
+					filho = raiz->esq;
+					NO* paiSucessor = raiz;
+					while (sucessor->esq != NULL) {
+						paiSucessor = sucessor;
+						if (sucessor->esq == NULL) {
+							break;
+						}
+						sucessor = sucessor->esq;
+					}
 
-	// caso 1: sem filhos	
-	
+					// copia o valor do sucessor para o no atual
+					raiz->valor = sucessor->valor;
+					if (raiz->dir == sucessor) {
+						raiz->dir = NULL;
+					}
+					else {
+						// se existir uma sub-arvore a direita do sucessor , entao
+					// ela deve ser ligada ao pai do sucessor
+						if (sucessor->dir != NULL)
+						{
+							paiSucessor->esq = sucessor->dir;
+						}
+						else {
+							paiSucessor->esq = NULL;
+						}
+					}				
+					
 
-	// caso 2: um filho	
-	
-
-	// caso 3: dois filhos
-
-	// procura o elmento mais a esquerda da sub-arvore da direita
-	NO* sucessor = atual->dir;
-	NO* paiSucessor = atual;
-	while (sucessor->esq != NULL) {
-		paiSucessor = sucessor;
-		sucessor = sucessor->esq;
-	}
-
-	// copia o valor do sucessor para o no atual
-	atual->valor = sucessor->valor;
-
-	// se existir uma sub-arvore a direita do sucessor , entao
-	// ela deve ser ligada ao pai do sucessor
-	if (sucessor->dir != NULL)
-	{
-		paiSucessor->esq = sucessor->dir;
+					//libera memoria
+					free(sucessor);
+				}
+			}
+		}
 	}
 	else {
-		paiSucessor->esq = NULL;
+		// caso 1: sem filhos	
+		if (atual->esq == NULL && atual->dir == NULL) {
+			if (pai->dir == atual) {
+				pai->dir = NULL;
+				free(atual);
+			}
+			else {
+				pai->esq = NULL;
+				free(atual);
+			}
+		}
+		// caso 2: um filho	
+		else {
+			if (atual->esq == NULL && atual->dir != NULL) { //filho da direita
+				filho = atual->dir;
+
+				if (pai->dir == atual) {
+					pai->dir = filho;
+					free(atual);
+				}
+				else {
+					pai->esq = filho;
+					free(atual);
+				}
+			}
+			else {
+				if (atual->esq != NULL && atual->dir == NULL) { //filho da esquerda
+					filho = atual->esq;
+
+					if (pai->dir == atual) {
+						pai->dir = filho;
+						free(atual);
+					}
+					else {
+						pai->esq = filho;
+						free(atual);
+					}
+				}
+				else {
+					// caso 3: dois filhos
+
+					// procura o elmento mais a esquerda da sub-arvore da direita
+					NO* sucessor = atual->dir;
+					NO* paiSucessor = atual;
+					while (sucessor->esq != NULL) {
+						paiSucessor = sucessor;
+						sucessor = sucessor->esq;
+					}
+
+					// copia o valor do sucessor para o no atual
+					atual->valor = sucessor->valor;
+
+					// se existir uma sub-arvore a direita do sucessor , entao
+					// ela deve ser ligada ao pai do sucessor
+					if (sucessor->dir != NULL)
+					{
+						paiSucessor->esq = sucessor->dir;
+					}
+					else {
+						paiSucessor->esq = NULL;
+					}
+
+					//libera memoria
+					free(sucessor);
+				}
+			}
+		}
 	}
-
-	//libera memoria
-	free(sucessor);
-
-
 }
-
 
 
 
